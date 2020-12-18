@@ -1,21 +1,35 @@
 [package]
-name = "hologram"
-version = "0.1.0"
 authors = ["Cameron Eldridge <cameldridge@gmail.com>"]
 edition = "2018"
-
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
-
+name = "hologram"
+version = "0.1.0"
 [dependencies]
 anyhow = "1.0"
-ctrlc = { version = "3.1", features = ["termination"] }
 daemonize = "0.4"
+directories-next = "2.0"
 nix = "0.19"
 notify = "4.0"
 paw = "1.0"
-serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
-structopt = { version = "0.3", features = ["paw"] }
 tempfile = "3.1"
-tokio = { version = "0.3", features = ["fs", "rt-multi-thread", "macros", "sync", "process"] }
-uuid = { version = "0.8", features = ["v4"] }
+toml = "0.5"
+
+[dependencies.ctrlc]
+features = ["termination"]
+version = "3.1"
+
+[dependencies.serde]
+features = ["derive"]
+version = "1.0"
+
+[dependencies.structopt]
+features = ["paw"]
+version = "0.3"
+
+[dependencies.tokio]
+features = ["fs", "rt-multi-thread", "macros", "sync", "process"]
+version = "0.3"
+
+[dependencies.uuid]
+features = ["v4"]
+version = "0.8"

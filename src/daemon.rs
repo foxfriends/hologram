@@ -167,6 +167,38 @@ where
     true
 }
 
+#[derive(serde::Serialize, serde::Deserialize)]
+struct ConfigTask {
+    dest: PathBuf,
+    cwd: PathBuf,
+    cmd: Vec<String>,
+}
+
+#[derive(Default, serde::Serialize, serde::Deserialize)]
+struct Config {
+    tasks: Vec<ConfigTask>,
+}
+
+async fn get_config() -> anyhow::Result<Config> {
+    let config_file = crate::config_file();
+    if !config_file.exists() {
+        Ok(Config::default())
+    } else {
+        let config = fs::read_to_string(config_file).await?;
+        Ok(toml::de::from_str(&config)?)
+    }
+}
+
+async fn save_config(config: Config) -> anyhow::Result<()> {
+    let config_file = crate::config_file();
+    if !config_file.exists() {
+        fs::create_dir_all(config_file.parent().unwrap()).await?;
+    }
+    let config = toml::ser::to_string(&config)?;
+    fs::write(config_file, config).await?;
+    Ok(())
+}
+
 pub async fn daemon() -> anyhow::Result<()> {
     let (end, ended) = oneshot::channel();
     let mut end = Some(end);
@@ -185,18 +217,33 @@ pub async fn daemon() -> anyhow::Result<()> {
     .unwrap();
     let mut tasks: HashMap<PathBuf, Task> = HashMap::new();
 
+    let config = get_config().await?;
+    for task in config.tasks {
+        tasks.insert(task.dest.clone(), Task::new(task.dest, task.cwd, task.cmd).await?);
+    }
+
     let main_task = async {
         loop {
             let cont = cmd(|action| async {
                 match action {
                     Action::Add { dest, cwd, cmd } => {
-                        let task = Task::new(dest.clone(), cwd, cmd).await?;
+                        let task = Task::new(dest.clone(), cwd.clone(), cmd.clone()).await?;
+                        let mut config = get_config().await?;
+                        config.tasks.push(ConfigTask { dest: dest.clone(), cwd, cmd });
+                        save_config(config).await?;
                         tasks.insert(dest, task);
                         Ok(Response::Silent)
                     }
                     Action::Remove { dest } => match tasks.remove(&dest) {
                         Some(task) => {
                             task.end().await?;
+                            let mut config = get_config().await?;
+                            config.tasks = config
+                                .tasks
+                                .into_iter()
+                                .filter(|task| task.dest != dest)
+                                .collect();
+                            save_config(config).await?;
                             Ok(Response::Silent)
                         }
                         None => Ok(Response::Respond(

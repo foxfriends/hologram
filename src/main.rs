@@ -1,9 +1,17 @@
 use std::path::PathBuf;
+use directories_next::ProjectDirs;
 
 mod daemon;
 
 fn socket_file() -> PathBuf {
     std::env::temp_dir().join("hologramd.socket")
+}
+
+fn config_file() -> PathBuf {
+    ProjectDirs::from("com", "cameldridge", "hologram")
+        .unwrap()
+        .config_dir()
+        .join("hologram.toml")
 }
 
 /// Create holographic files, projecting the output of an arbitrary command.

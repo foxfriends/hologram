@@ -34,8 +34,6 @@ but will provide information on that subject soon.
 
 ## Configuration
 
-> Not yet implemented.
-
 Previously created holograms are recorded in the configuration file, allowing
 the daemon to immediately resume where it left off.
 
@@ -44,7 +42,7 @@ when modified, it will not pick up changes until the daemon is restarted:
 
 ```toml
 [[hologram]]
-destination = "/home/<user>/file.txt"  # the file to project
+dest = "/home/<user>/file.txt"  # the file to project
 cwd = "/home/<user>/" # the CWD to run the command from
 cmd = "./file.sh" # The command to run, often a script located relative to cwd
 ```
