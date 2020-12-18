@@ -176,6 +176,7 @@ struct ConfigTask {
 
 #[derive(Default, serde::Serialize, serde::Deserialize)]
 struct Config {
+    #[serde(default)]
     tasks: Vec<ConfigTask>,
 }
 
