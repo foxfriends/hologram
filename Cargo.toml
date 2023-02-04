@@ -28,7 +28,7 @@ version = "0.3"
 
 [dependencies.tokio]
 features = ["fs", "rt-multi-thread", "macros", "sync", "process"]
-version = "1.8"
+version = "1.18"
 
 [dependencies.uuid]
 features = ["v4"]
